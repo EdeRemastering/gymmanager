@@ -67,7 +67,7 @@ export default function ClientesPage() {
     const clientPayload = {
       nombre,
       identificacion,
-      plan: { id: planIdToSend },
+      planId: planIdToSend,
     }
 
     console.log("Creating cliente with:", clientPayload)
