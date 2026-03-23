@@ -13,11 +13,14 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 // Clientes
 export const getClientes = () => fetchJson<Cliente[]>(`${BACKEND_BASE}/clientes`)
 export const getCliente = (id: number) => fetchJson<Cliente>(`${BACKEND_BASE}/clientes/${id}`)
-export const createCliente = (payload: {
+export type CreateClientePayload = {
   nombre: string
   identificacion: string
-  plan: { id: number }
-}) =>
+  plan?: { id: number }
+  planId?: number
+}
+
+export const createCliente = (payload: CreateClientePayload) =>
   fetchJson<Cliente>(`${BACKEND_BASE}/clientes`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

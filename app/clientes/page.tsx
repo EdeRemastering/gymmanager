@@ -51,18 +51,37 @@ export default function ClientesPage() {
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const planIdToSend = planId ?? planOptions[0]?.value
-    console.log("Creating cliente with:", { nombre, identificacion, plan: { id: planIdToSend } })
-    if (!nombre || !identificacion || !planIdToSend) return
+
+    if (!nombre.trim() || !identificacion.trim()) {
+      setError("Nombre e identificación son obligatorios.")
+      return
+    }
+
+    if (!planIdToSend || planIdToSend <= 0) {
+      setError("Selecciona un plan válido antes de crear el cliente.")
+      return
+    }
+
+    setError(null)
+
+    const clientPayload = {
+      nombre,
+      identificacion,
+      plan: { id: planIdToSend },
+      planId: planIdToSend,
+    }
+
+    console.log("Creating cliente with:", clientPayload)
 
     try {
-      await createCliente({ nombre, identificacion, plan: { id: planIdToSend } })
+      await createCliente(clientPayload)
       setOpen(false)
       setNombre("")
       setIdentificacion("")
       setPlanId(undefined)
       await fetchData()
     } catch (err) {
-      setError("Error al crear cliente. Intenta nuevamente.")
+      setError("Error al crear cliente. Intenta nuevamente. Revisa backend y CORS.")
       console.error(err)
     }
   }
