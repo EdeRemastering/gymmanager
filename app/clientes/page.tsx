@@ -51,10 +51,11 @@ export default function ClientesPage() {
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const planIdToSend = planId ?? planOptions[0]?.value
+    console.log("Creating cliente with:", { nombre, identificacion, plan: { id: planIdToSend } })
     if (!nombre || !identificacion || !planIdToSend) return
 
     try {
-      await createCliente({ nombre, identificacion, planId: planIdToSend })
+      await createCliente({ nombre, identificacion, plan: { id: planIdToSend } })
       setOpen(false)
       setNombre("")
       setIdentificacion("")
@@ -136,7 +137,7 @@ export default function ClientesPage() {
               <TableCell>{cliente.id ?? "-"}</TableCell>
               <TableCell>{cliente.nombre}</TableCell>
               <TableCell>{cliente.identificacion}</TableCell>
-              <TableCell>{cliente.planId ?? "-"}</TableCell>
+              <TableCell>{cliente.plan?.id ?? "-"}</TableCell>
             </TableRow>
           ))}
         </TableBody>
