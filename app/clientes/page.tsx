@@ -68,7 +68,6 @@ export default function ClientesPage() {
       nombre,
       identificacion,
       plan: { id: planIdToSend },
-      planId: planIdToSend,
     }
 
     console.log("Creating cliente with:", clientPayload)
@@ -81,7 +80,8 @@ export default function ClientesPage() {
       setPlanId(undefined)
       await fetchData()
     } catch (err) {
-      setError("Error al crear cliente. Intenta nuevamente. Revisa backend y CORS.")
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      setError(`Error al crear cliente: ${message}. Revisa backend y CORS.`)
       console.error(err)
     }
   }
