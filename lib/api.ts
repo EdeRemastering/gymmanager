@@ -11,28 +11,40 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 // Clientes
-export const getClientes = () => fetchJson<Cliente[]>(`${BACKEND_BASE}/api/clientes`)
-export const getCliente = (id: number) => fetchJson<Cliente>(`${BACKEND_BASE}/api/clientes/${id}`)
+export const getClientes = () => fetchJson<Cliente[]>(`${BACKEND_BASE}/clientes`)
+export const getCliente = (id: number) => fetchJson<Cliente>(`${BACKEND_BASE}/clientes/${id}`)
 export const createCliente = (payload: Omit<Cliente, "id">) =>
-  fetchJson<Cliente>(`${BACKEND_BASE}/api/clientes`, {
+  fetchJson<Cliente>(`${BACKEND_BASE}/clientes`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   })
 export const updateCliente = (id: number, payload: Partial<Cliente>) =>
-  fetchJson<Cliente>(`${BACKEND_BASE}/api/clientes/${id}`, {
+  fetchJson<Cliente>(`${BACKEND_BASE}/clientes/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   })
 export const deleteCliente = (id: number) =>
-  fetchJson<void>(`${BACKEND_BASE}/api/clientes/${id}`, {
+  fetchJson<void>(`${BACKEND_BASE}/clientes/${id}`, {
     method: "DELETE",
   })
 
 // Entrenadores
 export const getEntrenadores = () =>
-  fetchJson<Entrenador[]>(`${BACKEND_BASE}/api/entrenadores`)
+  fetchJson<Entrenador[]>(`${BACKEND_BASE}/entrenadores`)
+export const createEntrenador = (payload: Omit<Entrenador, "id">) =>
+  fetchJson<Entrenador>(`${BACKEND_BASE}/entrenadores`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
 
 // Planes
-export const getPlanes = () => fetchJson<Plan[]>(`${BACKEND_BASE}/api/planes`)
+export const getPlanes = () => fetchJson<Plan[]>(`${BACKEND_BASE}/planes`)
+export const createPlan = (payload: Omit<Plan, "id">) =>
+  fetchJson<Plan>(`${BACKEND_BASE}/planes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })

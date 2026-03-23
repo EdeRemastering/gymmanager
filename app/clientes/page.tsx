@@ -1,45 +1,141 @@
-import { getClientes } from "@/lib/api"
-import type { Cliente } from "@/lib/models"
+"use client"
 
-export default async function ClientesPage() {
-  let clientes: Cliente[] = []
-  try {
-    clientes = await getClientes()
-  } catch (error) {
-    console.error("Error fetching clientes", error)
+import { useEffect, useMemo, useState } from "react"
+import { PlusIcon } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
+import { Cliente, Plan } from "@/lib/models"
+import { createCliente, getClientes, getPlanes } from "@/lib/api"
+
+export default function ClientesPage() {
+  const [clientes, setClientes] = useState<Cliente[]>([])
+  const [planes, setPlanes] = useState<Plan[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const [open, setOpen] = useState(false)
+  const [nombre, setNombre] = useState("")
+  const [identificacion, setIdentificacion] = useState("")
+  const [planId, setPlanId] = useState<number | undefined>(undefined)
+
+  const fetchData = async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      const [clientesResp, planesResp] = await Promise.all([getClientes(), getPlanes()])
+      setClientes(clientesResp)
+      setPlanes(planesResp)
+    } catch (err) {
+      setError("No fue posible cargar datos. Revisa el backend y CORS.")
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const planOptions = useMemo(
+    () => planes.map((p) => ({ label: p.nombre, value: p.id ?? 0 })),
+    [planes]
+  )
+
+  const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const planIdToSend = planId ?? planOptions[0]?.value
+    if (!nombre || !identificacion || !planIdToSend) return
+
+    try {
+      await createCliente({ nombre, identificacion, planId: planIdToSend })
+      setOpen(false)
+      setNombre("")
+      setIdentificacion("")
+      setPlanId(undefined)
+      await fetchData()
+    } catch (err) {
+      setError("Error al crear cliente. Intenta nuevamente.")
+      console.error(err)
+    }
   }
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Clientes</h1>
-      {clientes.length === 0 ? (
-        <p>No hay clientes registrados o no se pudo contactar al backend.</p>
-      ) : (
-        <div className="rounded-lg border bg-background shadow-sm">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/10 text-left text-xs uppercase text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2">ID</th>
-                <th className="px-3 py-2">Nombre</th>
-                <th className="px-3 py-2">Email</th>
-                <th className="px-3 py-2">Objetivo</th>
-                <th className="px-3 py-2">Entrenador</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientes.map((cliente) => (
-                <tr key={cliente.id} className="border-b">
-                  <td className="px-3 py-2">{cliente.id}</td>
-                  <td className="px-3 py-2">{cliente.nombre} {cliente.apellido}</td>
-                  <td className="px-3 py-2">{cliente.email}</td>
-                  <td className="px-3 py-2">{cliente.objetivo ?? "-"}</td>
-                  <td className="px-3 py-2">{cliente.entrenadorId ?? "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Clientes</h1>
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="default" size="sm" className="gap-2">
+              <PlusIcon /> Crear Cliente
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[min(95vw,450px)]">
+            <SheetHeader>
+              <SheetTitle>Crear Cliente</SheetTitle>
+              <SheetDescription>Ingresa los datos del nuevo cliente.</SheetDescription>
+            </SheetHeader>
+            <form onSubmit={handleCreate} className="space-y-4 p-2">
+              <div className="grid gap-2">
+                <Label htmlFor="nombre">Nombre</Label>
+                <Input id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="identificacion">Identificación</Label>
+                <Input id="identificacion" value={identificacion} onChange={(e) => setIdentificacion(e.target.value)} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="plan">Plan</Label>
+                <Select value={planId?.toString() ?? ""} onValueChange={(v) => setPlanId(Number(v))}>
+                  <SelectTrigger id="plan">
+                    <SelectValue placeholder="Selecciona un plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {planOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value.toString()}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <SheetFooter>
+                <Button type="submit">Guardar Cliente</Button>
+              </SheetFooter>
+            </form>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {loading && <p>Cargando...</p>}
+      {error && <p className="text-destructive">{error}</p>}
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Nombre</TableHead>
+            <TableHead>Identificación</TableHead>
+            <TableHead>Plan ID</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {clientes.map((cliente) => (
+            <TableRow key={cliente.id ?? `${cliente.nombre}-${cliente.identificacion}-${Math.random()}`}>
+              <TableCell>{cliente.id ?? "-"}</TableCell>
+              <TableCell>{cliente.nombre}</TableCell>
+              <TableCell>{cliente.identificacion}</TableCell>
+              <TableCell>{cliente.planId ?? "-"}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }
