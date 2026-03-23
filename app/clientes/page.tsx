@@ -68,6 +68,10 @@ export default function ClientesPage() {
     }
 
     if (!planIdToSend || planIdToSend <= 0) {
+      if (planes.length === 0) {
+        setError("No hay planes disponibles. Crea un plan primero o selecciona uno.")
+        return
+      }
       setError("Selecciona un plan válido antes de crear el cliente.")
       return
     }
@@ -193,7 +197,7 @@ export default function ClientesPage() {
         <h1 className="text-2xl font-bold">Clientes</h1>
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="default" size="sm" className="gap-2" disabled={planOptions.length === 0}>
+            <Button variant="default" size="sm" className="gap-2">
               <PlusIcon /> Crear Cliente
             </Button>
           </SheetTrigger>
@@ -201,11 +205,6 @@ export default function ClientesPage() {
             <SheetHeader>
               <SheetTitle>Crear Cliente</SheetTitle>
               <SheetDescription>Ingresa los datos del nuevo cliente.</SheetDescription>
-              {planOptions.length === 0 && (
-                <p className="mt-2 rounded-md border border-yellow-300 bg-yellow-50 p-2 text-sm text-yellow-800">
-                  No hay planes disponibles. Ve a la sección Planes y crea uno para asignar.
-                </p>
-              )}
             </SheetHeader>
             <form onSubmit={handleCreate} className="space-y-4 p-2">
               <div className="grid gap-2">
