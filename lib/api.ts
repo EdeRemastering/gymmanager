@@ -1,4 +1,4 @@
-import { Cliente, Entrenador, Plan } from "./models"
+import { Cliente, Entrenador, Pago, Plan } from "./models"
 
 const BACKEND_BASE = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080"
 

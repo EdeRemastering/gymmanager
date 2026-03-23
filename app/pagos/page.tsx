@@ -268,10 +268,12 @@ export default function PagosPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {pagos.map((pago) => (
+          {pagos.map((pago) => {
+            const clienteNombre = typeof pago.cliente === 'object' ? pago.cliente.nombre : clientes.find(c => c.id === pago.cliente)?.nombre || "Cliente desconocido"
+            return (
             <TableRow key={pago.id ?? `${pago.fecha}-${pago.monto}-${Math.random()}`}>
               <TableCell>{pago.id ?? "-"}</TableCell>
-              <TableCell>{typeof pago.cliente === 'object' && 'nombre' in pago.cliente ? pago.cliente.nombre : "Cliente desconocido"}</TableCell>
+              <TableCell>{clienteNombre}</TableCell>
               <TableCell>{pago.monto.toFixed(2)}</TableCell>
               <TableCell>{pago.fecha}</TableCell>
               <TableCell>{pago.estado}</TableCell>
@@ -290,7 +292,7 @@ export default function PagosPage() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>¿Eliminar pago?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Esta acción no se puede deshacer. Se eliminará el pago de {typeof pago.cliente === 'object' && 'nombre' in pago.cliente ? pago.cliente.nombre : "cliente"}.
+                          Esta acción no se puede deshacer. Se eliminará el pago de {clienteNombre}.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -302,7 +304,8 @@ export default function PagosPage() {
                 </div>
               </TableCell>
             </TableRow>
-          ))}
+            )
+          })}
         </TableBody>
       </Table>
     </div>
