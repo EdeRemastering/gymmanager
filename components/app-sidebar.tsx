@@ -26,42 +26,30 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/",
       icon: (
-        <LayoutDashboardIcon
-        />
+        <LayoutDashboardIcon />
       ),
     },
     {
-      title: "Lifecycle",
-      url: "#",
+      title: "Clientes",
+      url: "/clientes",
       icon: (
-        <ListIcon
-        />
+        <UsersIcon />
       ),
     },
     {
-      title: "Analytics",
-      url: "#",
+      title: "Entrenadores",
+      url: "/entrenadores",
       icon: (
-        <ChartBarIcon
-        />
+        <ListIcon />
       ),
     },
     {
-      title: "Projects",
-      url: "#",
+      title: "Planes",
+      url: "/planes",
       icon: (
-        <FolderIcon
-        />
-      ),
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
+        <FolderIcon />
       ),
     },
   ],
