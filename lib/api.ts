@@ -7,6 +7,9 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`)
   }
+  if (res.status === 204 || !res.headers.get('content-type')?.includes('application/json')) {
+    return undefined as T
+  }
   return res.json()
 }
 
