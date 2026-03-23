@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { PlusIcon } from "lucide-react"
+import { EditIcon, PlusIcon, TrashIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 import { Cliente, Plan } from "@/lib/models"
-import { createCliente, getClientes, getPlanes } from "@/lib/api"
+import { createCliente, deleteCliente, getClientes, getPlanes, updateCliente } from "@/lib/api"
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
@@ -23,6 +24,9 @@ export default function ClientesPage() {
   const [nombre, setNombre] = useState("")
   const [identificacion, setIdentificacion] = useState("")
   const [planId, setPlanId] = useState<number | undefined>(undefined)
+
+  const [openEdit, setOpenEdit] = useState(false)
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
 
   const fetchData = async () => {
     setError(null)
@@ -92,6 +96,74 @@ export default function ClientesPage() {
     }
   }
 
+  const handleEdit = (cliente: Cliente) => {
+    setSelectedCliente(cliente)
+    setNombre(cliente.nombre)
+    setIdentificacion(cliente.identificacion)
+    setPlanId(cliente.plan?.id)
+    setOpenEdit(true)
+  }
+
+  const handleUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!selectedCliente) return
+
+    const planIdToSend = planId ?? planOptions[0]?.value
+
+    if (!nombre.trim() || !identificacion.trim()) {
+      setError("Nombre e identificación son obligatorios.")
+      return
+    }
+
+    if (!planIdToSend || planIdToSend <= 0) {
+      setError("Selecciona un plan válido antes de editar el cliente.")
+      return
+    }
+
+    const selectedPlanObj = planes.find(p => p.id === planIdToSend)
+    if (!selectedPlanObj) {
+      setError("El plan seleccionado no existe.")
+      return
+    }
+
+    setError(null)
+
+    const clientPayload = {
+      nombre,
+      identificacion,
+      plan: selectedPlanObj,
+    }
+
+    console.log("Updating cliente with:", clientPayload)
+
+    try {
+      await updateCliente(selectedCliente.id!, clientPayload)
+      setOpenEdit(false)
+      setSelectedCliente(null)
+      setNombre("")
+      setIdentificacion("")
+      setPlanId(undefined)
+      await fetchData()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      setError(`Error al actualizar cliente: ${message}. Revisa backend y CORS.`)
+      console.error(err)
+    }
+  }
+
+  const handleDelete = async (cliente: Cliente) => {
+    if (!cliente.id) return
+
+    try {
+      await deleteCliente(cliente.id)
+      await fetchData()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      setError(`Error al eliminar cliente: ${message}. Revisa backend y CORS.`)
+      console.error(err)
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
@@ -144,6 +216,43 @@ export default function ClientesPage() {
         </Sheet>
       </div>
 
+      <Sheet open={openEdit} onOpenChange={setOpenEdit}>
+        <SheetContent side="right" className="w-[min(95vw,450px)]">
+          <SheetHeader>
+            <SheetTitle>Editar Cliente</SheetTitle>
+            <SheetDescription>Modifica los datos del cliente.</SheetDescription>
+          </SheetHeader>
+          <form onSubmit={handleUpdate} className="space-y-4 p-2">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-nombre">Nombre</Label>
+              <Input id="edit-nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-identificacion">Identificación</Label>
+              <Input id="edit-identificacion" value={identificacion} onChange={(e) => setIdentificacion(e.target.value)} required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-plan">Plan</Label>
+              <Select value={planId?.toString() ?? ""} onValueChange={(v) => setPlanId(Number(v))}>
+                <SelectTrigger id="edit-plan">
+                  <SelectValue placeholder="Selecciona un plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {planOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value.toString()}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <SheetFooter>
+              <Button type="submit">Actualizar Cliente</Button>
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
+
       {loading && <p>Cargando...</p>}
       {error && <p className="text-destructive">{error}</p>}
 
@@ -154,6 +263,7 @@ export default function ClientesPage() {
             <TableHead>Nombre</TableHead>
             <TableHead>Identificación</TableHead>
             <TableHead>Plan</TableHead>
+            <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -163,6 +273,32 @@ export default function ClientesPage() {
               <TableCell>{cliente.nombre}</TableCell>
               <TableCell>{cliente.identificacion}</TableCell>
               <TableCell>{planes.find(p => p.id === cliente.plan?.id)?.nombre ?? "-"}</TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(cliente)}>
+                    <EditIcon className="h-4 w-4" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm">
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción no se puede deshacer. Se eliminará el cliente "{cliente.nombre}".
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(cliente)}>Eliminar</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

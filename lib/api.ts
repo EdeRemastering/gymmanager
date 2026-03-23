@@ -45,6 +45,16 @@ export const createEntrenador = (payload: Omit<Entrenador, "id">) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   })
+export const updateEntrenador = (id: number, payload: Partial<Entrenador>) =>
+  fetchJson<Entrenador>(`${BACKEND_BASE}/entrenadores/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+export const deleteEntrenador = (id: number) =>
+  fetchJson<void>(`${BACKEND_BASE}/entrenadores/${id}`, {
+    method: "DELETE",
+  })
 
 // Planes
 export const getPlanes = () => fetchJson<Plan[]>(`${BACKEND_BASE}/planes`)
@@ -53,4 +63,14 @@ export const createPlan = (payload: Omit<Plan, "id">) =>
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+  })
+export const updatePlan = (id: number, payload: Partial<Plan>) =>
+  fetchJson<Plan>(`${BACKEND_BASE}/planes/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+export const deletePlan = (id: number) =>
+  fetchJson<void>(`${BACKEND_BASE}/planes/${id}`, {
+    method: "DELETE",
   })
