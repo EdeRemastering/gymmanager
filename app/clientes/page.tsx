@@ -153,7 +153,7 @@ export default function ClientesPage() {
             <TableHead>ID</TableHead>
             <TableHead>Nombre</TableHead>
             <TableHead>Identificación</TableHead>
-            <TableHead>Plan ID</TableHead>
+            <TableHead>Plan</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -162,7 +162,7 @@ export default function ClientesPage() {
               <TableCell>{cliente.id ?? "-"}</TableCell>
               <TableCell>{cliente.nombre}</TableCell>
               <TableCell>{cliente.identificacion}</TableCell>
-              <TableCell>{cliente.plan?.id ?? "-"}</TableCell>
+              <TableCell>{planes.find(p => p.id === cliente.plan?.id)?.nombre ?? "-"}</TableCell>
             </TableRow>
           ))}
         </TableBody>
