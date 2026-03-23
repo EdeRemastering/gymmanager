@@ -16,7 +16,7 @@ export const getCliente = (id: number) => fetchJson<Cliente>(`${BACKEND_BASE}/cl
 export type CreateClientePayload = {
   nombre: string
   identificacion: string
-  planId: number
+  plan: Plan
 }
 
 export const createCliente = (payload: CreateClientePayload) =>

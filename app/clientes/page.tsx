@@ -62,12 +62,18 @@ export default function ClientesPage() {
       return
     }
 
+    const selectedPlanObj = planes.find(p => p.id === planIdToSend)
+    if (!selectedPlanObj) {
+      setError("El plan seleccionado no existe.")
+      return
+    }
+
     setError(null)
 
     const clientPayload = {
       nombre,
       identificacion,
-      planId: planIdToSend,
+      plan: selectedPlanObj,
     }
 
     console.log("Creating cliente with:", clientPayload)
