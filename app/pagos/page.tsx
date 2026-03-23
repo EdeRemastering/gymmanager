@@ -84,7 +84,7 @@ export default function PagosPage() {
     setSelectedPago(pago)
     setClienteId(typeof pago.cliente === 'object' ? pago.cliente.id : pago.cliente)
     setMonto(pago.monto)
-    setFecha(pago.fecha)
+    setFecha(pago.fecha.split('T')[0]) // Formatear fecha para input date
     setEstado(pago.estado)
     setOpenEdit(true)
   }
@@ -269,13 +269,14 @@ export default function PagosPage() {
         </TableHeader>
         <TableBody>
           {pagos.map((pago) => {
-            const clienteNombre = typeof pago.cliente === 'object' ? pago.cliente.nombre : clientes.find(c => c.id === pago.cliente)?.nombre || "Cliente desconocido"
+            const clienteId = typeof pago.cliente === 'object' ? pago.cliente.id : pago.cliente
+            const clienteNombre = typeof pago.cliente === 'object' && 'nombre' in pago.cliente ? pago.cliente.nombre : clientes.find(c => c.id === clienteId)?.nombre || "Cliente desconocido"
             return (
             <TableRow key={pago.id ?? `${pago.fecha}-${pago.monto}-${Math.random()}`}>
               <TableCell>{pago.id ?? "-"}</TableCell>
               <TableCell>{clienteNombre}</TableCell>
               <TableCell>{pago.monto.toFixed(2)}</TableCell>
-              <TableCell>{pago.fecha}</TableCell>
+              <TableCell>{pago.fecha.split('T')[0]}</TableCell>
               <TableCell>{pago.estado}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
