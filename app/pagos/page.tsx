@@ -81,7 +81,7 @@ export default function PagosPage() {
 
   const handleEdit = (pago: Pago) => {
     setSelectedPago(pago)
-    setClienteId(typeof pago.cliente === 'object' ? pago.cliente.id : pago.cliente.id)
+    setClienteId(typeof pago.cliente === 'object' ? pago.cliente.id : pago.cliente)
     setMonto(pago.monto)
     setFecha(pago.fecha)
     setEstado(pago.estado)
