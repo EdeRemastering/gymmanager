@@ -26,7 +26,6 @@ export default function PagosPage() {
 
   const [clienteId, setClienteId] = useState<number | undefined>(undefined)
   const [monto, setMonto] = useState(0)
-  const [fecha, setFecha] = useState("")
   const [estado, setEstado] = useState<Pago["estado"]>("PENDIENTE")
 
   const fetchData = async () => {
@@ -84,7 +83,6 @@ export default function PagosPage() {
     setSelectedPago(pago)
     setClienteId(typeof pago.cliente === 'object' ? pago.cliente.id : pago.cliente)
     setMonto(pago.monto)
-    setFecha(pago.fecha ? pago.fecha.split('T')[0] : "")
     setEstado(pago.estado)
     setOpenEdit(true)
   }
@@ -93,7 +91,7 @@ export default function PagosPage() {
     event.preventDefault()
     if (!selectedPago) return
 
-    if (!clienteId || monto <= 0 || !fecha) return
+    if (!clienteId || monto <= 0) return
 
     const selectedCliente = clientes.find(c => c.id === clienteId)
     if (!selectedCliente) {
@@ -106,7 +104,7 @@ export default function PagosPage() {
     const payload = {
       cliente: selectedCliente,
       monto,
-      fecha,
+      fecha: selectedPago.fecha, // Mantener la fecha original
       estado,
     }
 
@@ -139,7 +137,6 @@ export default function PagosPage() {
   const resetForm = () => {
     setClienteId(undefined)
     setMonto(0)
-    setFecha("")
     setEstado("PENDIENTE")
   }
 
@@ -226,13 +223,7 @@ export default function PagosPage() {
               <Input id="edit-monto" type="number" value={monto} onChange={(e) => setMonto(Number(e.target.value))} required />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-fecha">Fecha</Label>
-              <Input id="edit-fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
-            </div>
-            <div className="grid gap-2">              <Label htmlFor="edit-fecha">Fecha</Label>
-              <Input id="edit-fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
-            </div>
-            <div className="grid gap-2">              <Label htmlFor="edit-estado">Estado</Label>
+              <Label htmlFor="edit-estado">Estado</Label>
               <Select value={estado} onValueChange={(v: Pago["estado"]) => setEstado(v)}>
                 <SelectTrigger id="edit-estado">
                   <SelectValue />
