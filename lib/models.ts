@@ -18,3 +18,11 @@ export interface Entrenador extends Persona {
   especialidad: string
 }
 
+export interface Pago {
+  id?: number
+  cliente: Cliente | { id: number }
+  monto: number
+  fecha: string
+  estado: 'PENDIENTE' | 'PAGADO' | 'CANCELADO'
+}
+

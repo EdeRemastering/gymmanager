@@ -13,7 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, ListIcon, FolderIcon, UsersIcon, CommandIcon } from "lucide-react"
+import { LayoutDashboardIcon, ListIcon, FolderIcon, UsersIcon, CommandIcon, DollarSignIcon } from "lucide-react"
 
 const data = {
   user: {
@@ -22,13 +22,6 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
-    {
-      title: "Dashboard",
-      url: "/",
-      icon: (
-        <LayoutDashboardIcon />
-      ),
-    },
     {
       title: "Clientes",
       url: "/clientes",
@@ -48,6 +41,13 @@ const data = {
       url: "/planes",
       icon: (
         <FolderIcon />
+      ),
+    },
+    {
+      title: "Pagos",
+      url: "/pagos",
+      icon: (
+        <DollarSignIcon />
       ),
     },
   ],

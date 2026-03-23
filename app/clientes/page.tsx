@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { EditIcon, PlusIcon, TrashIcon } from "lucide-react"
+import { EditIcon, PlusIcon, TrashIcon, UserPlusIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,12 +11,13 @@ import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
-import { Cliente, Plan } from "@/lib/models"
-import { createCliente, deleteCliente, getClientes, getPlanes, updateCliente } from "@/lib/api"
+import { Cliente, Plan, Entrenador } from "@/lib/models"
+import { asignarEntrenadorACliente, createCliente, deleteCliente, getClientes, getEntrenadores, getPlanes, updateCliente } from "@/lib/api"
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [planes, setPlanes] = useState<Plan[]>([])
+  const [entrenadores, setEntrenadores] = useState<Entrenador[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,13 +29,18 @@ export default function ClientesPage() {
   const [openEdit, setOpenEdit] = useState(false)
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
 
+  const [openAssign, setOpenAssign] = useState(false)
+  const [selectedClienteForAssign, setSelectedClienteForAssign] = useState<Cliente | null>(null)
+  const [entrenadorId, setEntrenadorId] = useState<number | undefined>(undefined)
+
   const fetchData = async () => {
     setError(null)
     setLoading(true)
     try {
-      const [clientesResp, planesResp] = await Promise.all([getClientes(), getPlanes()])
+      const [clientesResp, planesResp, entrenadoresResp] = await Promise.all([getClientes(), getPlanes(), getEntrenadores()])
       setClientes(clientesResp)
       setPlanes(planesResp)
+      setEntrenadores(entrenadoresResp)
     } catch (err) {
       setError("No fue posible cargar datos. Revisa el backend y CORS.")
       console.error(err)
@@ -164,6 +170,23 @@ export default function ClientesPage() {
     }
   }
 
+  const handleAssign = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!selectedClienteForAssign || !entrenadorId) return
+
+    try {
+      await asignarEntrenadorACliente(selectedClienteForAssign.id!, entrenadorId)
+      setOpenAssign(false)
+      setSelectedClienteForAssign(null)
+      setEntrenadorId(undefined)
+      await fetchData()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      setError(`Error al asignar entrenador: ${message}`)
+      console.error(err)
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="mb-4 flex items-center justify-between">
@@ -253,6 +276,38 @@ export default function ClientesPage() {
         </SheetContent>
       </Sheet>
 
+      <AlertDialog open={openAssign} onOpenChange={setOpenAssign}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Asignar Entrenador</AlertDialogTitle>
+            <AlertDialogDescription>
+              Selecciona un entrenador para asignar a {selectedClienteForAssign?.nombre}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <form onSubmit={handleAssign} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="entrenador">Entrenador</Label>
+              <Select value={entrenadorId?.toString() ?? ""} onValueChange={(v) => setEntrenadorId(Number(v))}>
+                <SelectTrigger id="entrenador">
+                  <SelectValue placeholder="Selecciona un entrenador" />
+                </SelectTrigger>
+                <SelectContent>
+                  {entrenadores.map((entrenador) => (
+                    <SelectItem key={entrenador.id} value={entrenador.id!.toString()}>
+                      {entrenador.nombre} - {entrenador.especialidad}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction type="submit">Asignar</AlertDialogAction>
+            </AlertDialogFooter>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {loading && <p>Cargando...</p>}
       {error && <p className="text-destructive">{error}</p>}
 
@@ -277,6 +332,9 @@ export default function ClientesPage() {
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => handleEdit(cliente)}>
                     <EditIcon className="h-4 w-4" />
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => { setSelectedClienteForAssign(cliente); setOpenAssign(true) }}>
+                    <UserPlusIcon className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

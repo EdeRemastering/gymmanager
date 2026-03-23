@@ -77,3 +77,30 @@ export const deletePlan = (id: number) =>
   fetchJson<void>(`${BACKEND_BASE}/planes/${id}`, {
     method: "DELETE",
   })
+
+// Pagos
+export const getPagos = () => fetchJson<Pago[]>(`${BACKEND_BASE}/pagos`)
+export const getPagosPorCliente = (clienteId: number) => fetchJson<Pago[]>(`${BACKEND_BASE}/pagos/cliente/${clienteId}`)
+export const getPagosPorEstado = (estado: string) => fetchJson<Pago[]>(`${BACKEND_BASE}/pagos/estado/${estado}`)
+export const createPago = (payload: Omit<Pago, "id">) =>
+  fetchJson<Pago>(`${BACKEND_BASE}/pagos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+export const updatePago = (id: number, payload: Partial<Pago>) =>
+  fetchJson<Pago>(`${BACKEND_BASE}/pagos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+export const deletePago = (id: number) =>
+  fetchJson<void>(`${BACKEND_BASE}/pagos/${id}`, {
+    method: "DELETE",
+  })
+
+// Asignar entrenador a cliente
+export const asignarEntrenadorACliente = (clienteId: number, entrenadorId: number) =>
+  fetchJson<Cliente>(`${BACKEND_BASE}/clientes/${clienteId}/entrenador/${entrenadorId}`, {
+    method: "PUT",
+  })
