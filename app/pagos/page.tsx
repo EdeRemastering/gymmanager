@@ -271,7 +271,7 @@ export default function PagosPage() {
           {pagos.map((pago) => (
             <TableRow key={pago.id ?? `${pago.fecha}-${pago.monto}-${Math.random()}`}>
               <TableCell>{pago.id ?? "-"}</TableCell>
-              <TableCell>{typeof pago.cliente === 'object' ? pago.cliente.nombre : "Cliente desconocido"}</TableCell>
+              <TableCell>{typeof pago.cliente === 'object' && 'nombre' in pago.cliente ? pago.cliente.nombre : "Cliente desconocido"}</TableCell>
               <TableCell>{pago.monto.toFixed(2)}</TableCell>
               <TableCell>{pago.fecha}</TableCell>
               <TableCell>{pago.estado}</TableCell>
@@ -290,7 +290,7 @@ export default function PagosPage() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>¿Eliminar pago?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Esta acción no se puede deshacer. Se eliminará el pago de {typeof pago.cliente === 'object' ? pago.cliente.nombre : "cliente"}.
+                          Esta acción no se puede deshacer. Se eliminará el pago de {typeof pago.cliente === 'object' && 'nombre' in pago.cliente ? pago.cliente.nombre : "cliente"}.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
