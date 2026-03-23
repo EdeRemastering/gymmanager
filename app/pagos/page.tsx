@@ -51,7 +51,7 @@ export default function PagosPage() {
 
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!clienteId || monto <= 0 || !fecha) return
+    if (!clienteId || monto <= 0) return
 
     const selectedCliente = clientes.find(c => c.id === clienteId)
     if (!selectedCliente) {
@@ -64,7 +64,7 @@ export default function PagosPage() {
     const payload = {
       cliente: selectedCliente,
       monto,
-      fecha,
+      fecha: new Date().toISOString().split('T')[0], // Fecha actual automática
       estado,
     }
 
@@ -84,7 +84,7 @@ export default function PagosPage() {
     setSelectedPago(pago)
     setClienteId(typeof pago.cliente === 'object' ? pago.cliente.id : pago.cliente)
     setMonto(pago.monto)
-    setFecha(pago.fecha ? pago.fecha.split('T')[0] : "") // Formatear fecha para input date
+    setFecha(pago.fecha ? pago.fecha.split('T')[0] : "")
     setEstado(pago.estado)
     setOpenEdit(true)
   }
@@ -179,10 +179,6 @@ export default function PagosPage() {
                 <Input id="monto" type="number" value={monto} onChange={(e) => setMonto(Number(e.target.value))} required />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="fecha">Fecha</Label>
-                <Input id="fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
-              </div>
-              <div className="grid gap-2">
                 <Label htmlFor="estado">Estado</Label>
                 <Select value={estado} onValueChange={(v: Pago["estado"]) => setEstado(v)}>
                   <SelectTrigger id="estado">
@@ -233,8 +229,10 @@ export default function PagosPage() {
               <Label htmlFor="edit-fecha">Fecha</Label>
               <Input id="edit-fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-estado">Estado</Label>
+            <div className="grid gap-2">              <Label htmlFor="edit-fecha">Fecha</Label>
+              <Input id="edit-fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
+            </div>
+            <div className="grid gap-2">              <Label htmlFor="edit-estado">Estado</Label>
               <Select value={estado} onValueChange={(v: Pago["estado"]) => setEstado(v)}>
                 <SelectTrigger id="edit-estado">
                   <SelectValue />
