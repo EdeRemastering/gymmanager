@@ -37,8 +37,9 @@ export default function PagosPage() {
       setPagos(pagosResp)
       setClientes(clientesResp)
     } catch (err) {
-      setError("No fue posible cargar datos. Revisa el backend y CORS.")
-      console.error(err)
+      const message = err instanceof Error ? err.message : "Error desconocido"
+      setError(`No fue posible cargar datos: ${message}. Revisa el backend (¿está corriendo en http://localhost:8080?) y CORS.`)
+      console.error("Error loading pagos:", err)
     } finally {
       setLoading(false)
     }
