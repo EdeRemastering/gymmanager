@@ -12,6 +12,7 @@ export interface Plan {
 
 export interface Cliente extends Persona {
   plan?: Plan | { id: number }
+  entrenador?: Entrenador | { id: number }
 }
 
 export interface Entrenador extends Persona {
